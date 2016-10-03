@@ -1,14 +1,13 @@
 package com.xstudio.controllers.sys;
 
 import com.sun.javafx.scene.control.skin.VirtualFlow;
+import com.xstudio.controllers.framework.BaseController;
 import com.xstudio.dao.sys.*;
 import com.xstudio.models.sys.*;
-import com.xstudio.mybatis.Pagination;
 import com.xstudio.utilities.CommonUtility;
 import com.xstudio.utilities.ConstantUtility;
 import com.xstudio.validator.UserValidator;
 import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.encoding.Md5PasswordEncoder;
 import org.springframework.stereotype.Controller;
@@ -25,7 +24,6 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -33,15 +31,12 @@ import java.util.List;
  */
 @Controller
 @RequestMapping(value = "/admin/sys/users")
-public class UserManageController {
-
-    private Logger logger = Logger.getLogger(UserManageController.class);
+public class UserManageController extends BaseController {
 
     String prefix = "admin/sys/users/";
 
     @Resource
     UserValidator userValidator;
-
 
     @Resource
     SysUserMapper sysUserMapper;
@@ -57,15 +52,11 @@ public class UserManageController {
     @PreAuthorize("hasAuthority('ROLE_SYS_USER_LIST')")
     @RequestMapping(value = "/index")
     public String index(HttpServletRequest request, Model model) {
-        Pagination pagination = CommonUtility.getPagination(request, model);
-        HashMap<String, String> map = CommonUtility.getParameterMap(request);
-        CommonUtility.renderGridData(request, model,
-                sysUserMapperExtend.all(pagination, map),
-                pagination);
-
+        initSimpleList(request, model, sysUserMapperExtend, true);
         return prefix + "index";
     }
 
+    //TODO下次继续
     @PreAuthorize("hasAuthority('ROLE_SYS_USER_ADD')")
     @RequestMapping(value = "/add")
     public String add(HttpServletRequest request, Model model, @ModelAttribute("sysUser") SysUser sysUser) {
@@ -87,7 +78,7 @@ public class UserManageController {
 
         sysUser.setPassword(new Md5PasswordEncoder().encodePassword(sysUser.getPassword(), null));
         return CommonUtility.commonAdd(false, prefix, sysUser, "新增用户", sysUserMapper,
-                redirectAttributes, logger,"");
+                redirectAttributes, logger, "");
     }
 
     @PreAuthorize("hasAuthority('ROLE_SYS_USER_EDIT')")
@@ -107,14 +98,14 @@ public class UserManageController {
         if (sysUserMapper.selectByPrimaryKey(sysUser.getId()).getPassword().equals(sysUser.getPassword()) == false) {
             sysUser.setPassword(new Md5PasswordEncoder().encodePassword(sysUser.getPassword(), null));
         }
-        return CommonUtility.commonEdit(false, prefix, sysUser, "编辑用户", sysUserMapper, redirectAttributes, logger,"");
+        return CommonUtility.commonEdit(false, prefix, sysUser, "编辑用户", sysUserMapper, redirectAttributes, logger, "");
     }
 
     @PreAuthorize("hasAuthority('ROLE_SYS_USER_DELETE')")
     @RequestMapping(value = "/deleteEntity")
     public ModelAndView deleteEntity(HttpServletRequest request, Model model, Integer id,
                                      RedirectAttributes redirectAttributes, String limit, String offset) {
-        return CommonUtility.commonDelete(prefix, "删除用户", sysUserMapper, id, redirectAttributes, limit, offset, logger,"");
+        return CommonUtility.commonDelete(prefix, "删除用户", sysUserMapper, id, redirectAttributes, limit, offset, logger, "");
     }
 
     @Resource

@@ -1,7 +1,5 @@
 package com.xstudio.utilities;
 
-import com.alibaba.fastjson.JSON;
-import com.xstudio.controllers.framework.MetaModel;
 import com.xstudio.dao.sys.SysDictMapper;
 import com.xstudio.dao.sys.SysLogMapper;
 import com.xstudio.models.sys.SysDictExample;
@@ -13,7 +11,6 @@ import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import org.activiti.engine.TaskService;
 import org.activiti.engine.task.Task;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.BeanUtils;
@@ -22,14 +19,15 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.ui.Model;
 import org.springframework.util.ReflectionUtils;
-import org.springframework.util.ResourceUtils;
 import org.springframework.util.StringUtils;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.servlet.http.HttpServletRequest;
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.StringWriter;
 import java.lang.reflect.Field;
 import java.sql.Blob;
 import java.text.ParseException;
@@ -480,16 +478,16 @@ public class CommonUtility {
                 .selectByExample(example).get(0).getDictvalues();
     }
 
-    public static MetaModel loadFrameWorkMetaResource(String key) {
-        try {
-            File file = ResourceUtils.getFile("classpath:metaconfigs/" + key + ".json");
-            String content = FileUtils.readFileToString(file);
-            return JSON.parseObject(content, MetaModel.class);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
+//    public static MetaModel loadFrameWorkMetaResource(String key) {
+//        try {
+//            File file = ResourceUtils.getFile("classpath:metaconfigs/" + key + ".json");
+//            String content = FileUtils.readFileToString(file);
+//            return JSON.parseObject(content, MetaModel.class);
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//        return null;
+//    }
 
 
 }

@@ -1,6 +1,6 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<%@ include file="/WEB-INF/include/taglib.jsp"%>
-<%@include file="header.jsp"%>
+<%@ include file="/WEB-INF/include/taglib.jsp" %>
+<%@include file="header.jsp" %>
 <!DOCTYPE html>
 <html>
 <head>
@@ -34,6 +34,6 @@
     </table>
 </div>
 <script src="${ctxStatic}/javascript/index.js"></script>
-<%@include file="footer.jsp"%>
+<%@include file="footer.jsp" %>
 </body>
 </html>

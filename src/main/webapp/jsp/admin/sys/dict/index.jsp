@@ -1,6 +1,6 @@
 <%@ page language="java" pageEncoding="utf-8" %>
-<%@ include file="/WEB-INF/include/taglib.jsp"%>
-<%@include file="../../header.jsp"%>
+<%@ include file="/WEB-INF/include/taglib.jsp" %>
+<%@include file="../../header.jsp" %>
 <section class="content">
     <app:t_message></app:t_message>
 
@@ -54,6 +54,6 @@
     </div>
 </section>
 <script type="text/javascript">
-    mc('table',0,0,0);
+    mc('table', 0, 0, 0);
 </script>
-<%@include file="../../footer.jsp"%>
+<%@include file="../../footer.jsp" %>

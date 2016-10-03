@@ -1,12 +1,10 @@
 package com.xstudio.controllers.sys;
 
+import com.xstudio.controllers.framework.BaseController;
 import com.xstudio.dao.sys.SysDictMapper;
 import com.xstudio.dao.sys.SysDictMapperExtend;
 import com.xstudio.models.sys.SysDict;
-import com.xstudio.mybatis.Pagination;
-import com.xstudio.utilities.CommonUtility;
 import com.xstudio.validator.SysDictValidator;
-import org.apache.log4j.Logger;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -22,7 +20,6 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
-import java.util.HashMap;
 
 /**
  * Created by kira on 16/2/28.
@@ -30,8 +27,7 @@ import java.util.HashMap;
  */
 @Controller
 @RequestMapping(value = "/admin/sys/dict")
-public class DictManageController {
-    private Logger logger = Logger.getLogger(DictManageController.class);
+public class DictManageController extends BaseController {
 
     String prefix = "admin/sys/dict/";
 
@@ -52,11 +48,7 @@ public class DictManageController {
     @PreAuthorize("hasAuthority('ROLE_SYS_DICT_LIST')")
     @RequestMapping(value = "/index")
     public String index(HttpServletRequest request, Model model) {
-        Pagination pagination = new Pagination();
-        HashMap<String, String> map = CommonUtility.getParameterMap(request);
-        CommonUtility.renderGridData(request, model,
-                sysDictMapperExtend.all(pagination, map),
-                pagination);
+        initSimpleList(request, model, sysDictMapperExtend, false);
         return prefix + "index";
     }
 
@@ -75,9 +67,9 @@ public class DictManageController {
                                   @Valid @ModelAttribute("sysDict") SysDict sysDict,
                                   BindingResult bindingResult,
                                   RedirectAttributes redirectAttributes) {
-        return CommonUtility.commonAdd(bindingResult.hasErrors(), prefix,
+        return simpleAdd(bindingResult.hasErrors(), prefix,
                 sysDict, "新增字段", sysDictMapper,
-                redirectAttributes, logger,"");
+                redirectAttributes);
     }
 
 
@@ -95,7 +87,7 @@ public class DictManageController {
                                    @Valid @ModelAttribute("sysDict") SysDict sysDict,
                                    BindingResult bindingResult,
                                    RedirectAttributes redirectAttributes) {
-        return CommonUtility.commonEdit(false, prefix, sysDict, "编辑字段", sysDictMapper, redirectAttributes, logger,"");
+        return simpleEdit(bindingResult.hasErrors(), prefix, sysDict, "编辑字段", sysDictMapper, redirectAttributes);
     }
 
 
@@ -105,6 +97,6 @@ public class DictManageController {
     public ModelAndView deleteEntity(HttpServletRequest request, Model model,
                                      Integer id, String limit, String offset,
                                      RedirectAttributes redirectAttributes) {
-        return CommonUtility.commonDelete(prefix, "删除字段", sysDictMapper, id, redirectAttributes, limit, offset, logger,"");
+        return simpleDelete(prefix, "删除字段", sysDictMapper, id, redirectAttributes, limit, offset);
     }
 }
