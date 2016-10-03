@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.xstudio.dao.sys.SysDictMapperExtend">
+    <select id="all" resultType="java.util.LinkedHashMap">
+        select id,dictgroup,dictkey,dictvalues from sys_dict
+        where 1=1
+        <if test="dictkey!=null and dictkey!='' ">
+            and dictkey like CONCAT('%',#{dictkey},'%' )
+        </if>
+        <if test="dictgroup!=null and dictgroup!='' ">
+            and dictgroup like CONCAT('%',#{dictgroup},'%' )
+        </if>
+        order BY dictgroup desc
+    </select>
+</mapper>

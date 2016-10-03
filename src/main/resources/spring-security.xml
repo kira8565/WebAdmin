@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:sec="http://www.springframework.org/schema/security"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+		http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+		http://www.springframework.org/schema/security
+		http://www.springframework.org/schema/security/spring-security-4.0.xsd">
+
+    <!-- 配置不过滤的资源（静态资源及登录相关） -->
+    <sec:http pattern="/**/*.css" security="none"></sec:http>
+    <sec:http pattern="/**/*.jpg" security="none"></sec:http>
+    <sec:http pattern="/**/*.jpeg" security="none"></sec:http>
+    <sec:http pattern="/**/*.gif" security="none"></sec:http>
+    <sec:http pattern="/**/*.png" security="none"></sec:http>
+    <sec:http pattern="/**/*.ttf" security="none"></sec:http>
+    <sec:http pattern="/**/*.js" security="none"></sec:http>
+    <sec:http pattern="/**/*.woff" security="none"></sec:http>
+    <sec:http pattern="/**/*.woff2" security="none"></sec:http>
+
+    <sec:http pattern="/login.jsp" security="none"></sec:http>
+    <sec:http pattern="/getCode" security="none"/><!-- 不过滤验证码 -->
+    <sec:http pattern="/test/**" security="none"></sec:http><!-- 不过滤测试内容 -->
+    <sec:http auto-config="true" use-expressions="true">
+        <sec:intercept-url pattern="/" access="hasRole('ROLE_USER')"/>
+        <sec:intercept-url pattern="/admin/**" access="hasRole('ROLE_USER')"/>
+        <sec:access-denied-handler error-page="/403.jsp"></sec:access-denied-handler>
+
+        <sec:csrf disabled="true"></sec:csrf>
+
+        <sec:remember-me key="rememberkey"></sec:remember-me>
+        <sec:logout delete-cookies="JSESSIONID"></sec:logout>
+        <sec:form-login login-page="/login.jsp" authentication-failure-url="/login.jsp?error"
+
+                        always-use-default-target="true"
+                        default-target-url="/admin/index" authentication-success-handler-ref="menuInitFilter"/>
+
+        <sec:headers>
+            <sec:frame-options policy="SAMEORIGIN"></sec:frame-options>
+            <sec:hsts disabled="true"></sec:hsts>
+        </sec:headers>
+    </sec:http>
+
+    <sec:authentication-manager alias="authenticationManager">
+        <sec:authentication-provider>
+            <sec:jdbc-user-service data-source-ref="dataSource"
+                                   users-by-username-query="select `accounts` as username,password,enabled as status from sys_user where accounts=?"
+                                   authorities-by-username-query="select distinct a.`accounts` as username,d.authname AS authority  from sys_user as a  left join sys_role_user as b on a.id=b.userid left join sys_role as c on c.id=b.roleid left join sys_role_auth as d on d.roleid=c.id where a.`accounts`=? and d.authname is not null"/>
+            <sec:password-encoder hash="md5"></sec:password-encoder>
+        </sec:authentication-provider>
+    </sec:authentication-manager>
+
+    <sec:global-method-security pre-post-annotations="enabled" jsr250-annotations="enabled"
+                                secured-annotations="enabled"/>
+
+
+    <bean id="menuInitFilter" class="com.xstudio.interceptor.MenuInitHandler">
+    </bean>
+</beans>
+

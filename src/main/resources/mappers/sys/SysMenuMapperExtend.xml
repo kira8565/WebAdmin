@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xstudio.dao.sys.SysMenuMapperExtend">
+    <select id="all" resultType="java.util.LinkedHashMap">
+        select a.*,b.`name` as pname from sys_menu as a
+        left join sys_menu as b
+        on a.parentid=b.id
+        where 1=1
+        <if test="name!=null and name!='' ">
+            and a.name like CONCAT('%',#{name},'%' )
+        </if>
+        <if test="isshow!=null and isshow!='' ">
+            and a.isshow = #{isshow}
+        </if>
+        <if test="parentid!=null and parentid!=''">
+            AND a.`parentid`=#{parentid}
+        </if>
+        <if test="n_isshow!=null and n_isshow!='' ">
+            and a.isshow != #{n_isshow}
+        </if>
+
+    </select>
+</mapper>

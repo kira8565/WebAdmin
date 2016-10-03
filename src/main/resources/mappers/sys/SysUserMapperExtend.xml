@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.xstudio.dao.sys.SysUserMapperExtend">
+    <select id="all" resultType="java.util.LinkedHashMap">
+        select a.*,b.dictkey as sexname from sys_user as a
+        left join sys_dict as b on a.sex=b.dictvalues
+        where 1=1
+        <if test="name!=null and name!='' ">
+            and a.name like CONCAT('%',#{name},'%' )
+        </if>
+    </select>
+
+    <select id="loadUserAuth" resultType="java.util.HashMap">
+        select e.* from sys_user as a
+        left join sys_role_user as b on a.id=b.userid
+        left join sys_role as c on c.id=b.roleid
+        left join sys_role_menu as d on d.roleid=c.id
+        left join sys_menu as e on e.id=d.menuid
+        where a.id=#{id}
+    </select>
+
+</mapper>

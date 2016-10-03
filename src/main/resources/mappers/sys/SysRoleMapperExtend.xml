@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.xstudio.dao.sys.SysRoleMapperExtend">
+    <select id="all" resultType="java.util.LinkedHashMap">
+        select * from sys_role as a
+        where 1=1
+        <if test="name!=null and name!='' ">
+            and a.name like CONCAT('%',#{name},'%' )
+        </if>
+    </select>
+
+    <select id="loadRoleViaUser" resultType="java.util.HashMap">
+        select a.* from sys_role as a
+        left join sys_role_user as b on a.id=b.roleid
+        left join sys_user as c on c.id=b.userid
+        where c.password=#{password} and c.accounts=#{username}
+    </select>
+
+</mapper>
