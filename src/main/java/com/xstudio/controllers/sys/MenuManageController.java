@@ -1,26 +1,29 @@
 package com.xstudio.controllers.sys;
 
+import com.xstudio.controllers.framework.BaseController;
 import com.xstudio.dao.sys.SysMenuMapper;
 import com.xstudio.dao.sys.SysMenuMapperExtend;
 import com.xstudio.models.sys.SysMenu;
 import com.xstudio.models.sys.SysMenuExample;
 import com.xstudio.utilities.CommonUtility;
 import com.xstudio.validator.MenuValidator;
-import org.apache.commons.collections.map.HashedMap;
-import org.apache.log4j.Logger;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.WebDataBinder;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.InitBinder;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
 
 /**
  * Created by kira on 16/2/28.
@@ -28,9 +31,7 @@ import java.util.*;
  */
 @Controller
 @RequestMapping(value = "/admin/sys/menus")
-public class MenuManageController {
-
-    private Logger logger = Logger.getLogger(MenuManageController.class);
+public class MenuManageController extends BaseController {
 
     @Resource
     MenuValidator menuValidator;
@@ -48,13 +49,13 @@ public class MenuManageController {
     @Resource
     SysMenuMapper sysMenuMapper;
 
+    //菜单不分页
     @PreAuthorize("hasAuthority('ROLE_SYS_MENU_LIST')")
     @RequestMapping(value = "/index")
     public String index(HttpServletRequest request, Model model) {
-        Map<String, String> map = new HashedMap();
-        //2是用户级别的权限设置,不展示出来
+        HashMap<String, String> map = new HashMap<>();
         map.put("n_isshow", "2");
-        model.addAttribute("result", sysMenuMapperExtend.all(map));
+        simpleList(request, model, sysMenuMapperExtend, false, map);
         return prefix + "index";
     }
 
@@ -83,8 +84,8 @@ public class MenuManageController {
                                   @Valid @ModelAttribute("sysMenu") SysMenu sysMenu,
                                   BindingResult bindingResult,
                                   RedirectAttributes redirectAttributes) {
-        return CommonUtility.commonAdd(false, prefix, sysMenu, "新增菜单", sysMenuMapper,
-                redirectAttributes, logger,"");
+        return simpleAdd(bindingResult.hasErrors(), prefix, sysMenu, "新增菜单", sysMenuMapper,
+                redirectAttributes);
     }
 
     @PreAuthorize("hasAuthority('ROLE_SYS_MENU_EDIT')")
@@ -101,8 +102,8 @@ public class MenuManageController {
     public ModelAndView editEntity(HttpServletRequest request, Model model, SysMenu sysMenu,
                                    BindingResult bindingResult,
                                    RedirectAttributes redirectAttributes) {
-        return CommonUtility.commonEdit(false, prefix, sysMenu, "编辑菜单", sysMenuMapper,
-                redirectAttributes, logger,"");
+        return simpleEdit(bindingResult.hasErrors(), prefix, sysMenu, "编辑菜单", sysMenuMapper,
+                redirectAttributes);
     }
 
 
@@ -111,8 +112,8 @@ public class MenuManageController {
     public ModelAndView deleteEntity(HttpServletRequest request, Model model,
                                      Integer id, RedirectAttributes redirectAttributes,
                                      String limit, String offset) {
-        return CommonUtility.commonDelete(prefix, "删除菜单", sysMenuMapper, id, redirectAttributes, limit,
-                offset, logger,"");
+        return simpleDelete(prefix, "删除菜单", sysMenuMapper, id, redirectAttributes, limit,
+                offset);
     }
 
 }

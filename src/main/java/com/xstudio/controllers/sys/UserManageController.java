@@ -55,7 +55,7 @@ public class UserManageController extends BaseController {
     @PreAuthorize("hasAuthority('ROLE_SYS_USER_LIST')")
     @RequestMapping(value = "/index")
     public String index(HttpServletRequest request, Model model) {
-        initSimpleList(request, model, sysUserMapperExtend, true);
+        simpleList(request, model, sysUserMapperExtend, true, null);
         return prefix + "index";
     }
 

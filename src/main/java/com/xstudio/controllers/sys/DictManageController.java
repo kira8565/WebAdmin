@@ -48,7 +48,7 @@ public class DictManageController extends BaseController {
     @PreAuthorize("hasAuthority('ROLE_SYS_DICT_LIST')")
     @RequestMapping(value = "/index")
     public String index(HttpServletRequest request, Model model) {
-        initSimpleList(request, model, sysDictMapperExtend, false);
+        simpleList(request, model, sysDictMapperExtend, false, null);
         return prefix + "index";
     }
 

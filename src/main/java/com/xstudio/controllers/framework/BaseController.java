@@ -17,12 +17,15 @@ import java.util.HashMap;
 public class BaseController {
     protected Logger logger = Logger.getLogger(this.getClass());
 
-    protected void initSimpleList(HttpServletRequest request, Model model, IList list, Boolean needPage) {
+    protected void simpleList(HttpServletRequest request, Model model, IList list, Boolean needPage, HashMap<String, String> extendParam) {
         Pagination pagination = new Pagination();
         if (needPage) {
             pagination = CommonUtility.getPagination(request, model);
         }
         HashMap<String, String> map = CommonUtility.getParameterMap(request);
+        if (extendParam != null) {
+            map.putAll(extendParam);
+        }
         CommonUtility.renderGridData(request, model,
                 list.all(pagination, map),
                 pagination);
