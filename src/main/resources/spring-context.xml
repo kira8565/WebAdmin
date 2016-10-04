@@ -106,5 +106,8 @@
 
     <import resource="classpath:spring-mybatis.xml"/>
     <import resource="classpath:spring-session.xml"/>
+
+    <!--暂时不用-->
+    <!--<import resource="classpath:spring-metrics.xml"/>-->
     <!--<import resource="classpath:spring-shiro.xml"/>-->
 </beans>

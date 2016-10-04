@@ -1,13 +1,12 @@
 package com.xstudio.controllers.sys;
 
+import com.codahale.metrics.MetricRegistry;
+import com.xstudio.controllers.framework.BaseController;
 import com.xstudio.dao.sys.*;
 import com.xstudio.models.sys.*;
-import com.xstudio.mybatis.Pagination;
-import com.xstudio.utilities.CommonUtility;
 import com.xstudio.utilities.ConstantUtility;
 import com.xstudio.validator.RoleValidator;
 import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -22,8 +21,6 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -32,9 +29,7 @@ import java.util.List;
  */
 @Controller
 @RequestMapping(value = "/admin/sys/roles")
-public class RoleManageController {
-
-    private Logger logger = Logger.getLogger(RoleManageController.class);
+public class RoleManageController extends BaseController {
 
     String prefix = "admin/sys/roles/";
 
@@ -55,12 +50,7 @@ public class RoleManageController {
     @PreAuthorize("hasAuthority('ROLE_SYS_ROLE_LIST')")
     @RequestMapping(value = "/index")
     public String index(HttpServletRequest request, Model model) {
-        Pagination pagination = CommonUtility.getPagination(request, model);
-        HashMap<String, String> map = CommonUtility.getParameterMap(request);
-        CommonUtility.renderGridData(request, model,
-                sysRoleMapperExtend.all(pagination, map),
-                pagination);
-
+        simpleList(request, model, sysRoleMapperExtend, true, null);
         return prefix + "index";
     }
 
@@ -74,7 +64,7 @@ public class RoleManageController {
     @RequestMapping(value = "/addEntity")
     public ModelAndView addEntity(HttpServletRequest request, Model model, @Valid @ModelAttribute("sysRole") SysRole sysRole,
                                   BindingResult bindingResult, RedirectAttributes redirectAttributes) {
-        return CommonUtility.commonAdd(false, prefix, sysRole, "新增角色", sysRoleMapper, redirectAttributes, logger, "");
+        return simpleAdd(bindingResult.hasErrors(), prefix, sysRole, "新增角色", sysRoleMapper, redirectAttributes);
     }
 
     @PreAuthorize("hasAuthority('ROLE_SYS_ROLE_EDIT')")
@@ -88,14 +78,14 @@ public class RoleManageController {
     @RequestMapping(value = "/editEntity")
     public ModelAndView editEntity(HttpServletRequest request, Model model, @Valid @ModelAttribute("sysRole") SysRole sysRole,
                                    BindingResult bindingResult, RedirectAttributes redirectAttributes) {
-        return CommonUtility.commonEdit(false, prefix, sysRole, "编辑角色", sysRoleMapper, redirectAttributes, logger, "");
+        return simpleEdit(bindingResult.hasErrors(), prefix, sysRole, "编辑角色", sysRoleMapper, redirectAttributes);
     }
 
     @PreAuthorize("hasAuthority('ROLE_SYS_ROLE_DELETE')")
     @RequestMapping(value = "/deleteEntity")
     public ModelAndView deleteEntity(HttpServletRequest request, Model model, Integer id,
                                      RedirectAttributes redirectAttributes, String limit, String offset) {
-        return CommonUtility.commonDelete(prefix, "删除角色", sysRoleMapper, id, redirectAttributes, limit, offset, logger, "");
+        return simpleDelete(prefix, "删除角色", sysRoleMapper, id, redirectAttributes, limit, offset);
     }
 
 
@@ -105,28 +95,16 @@ public class RoleManageController {
     @Resource
     SysUserMapper sysUserMapper;
 
+    @Resource
+    SysUserMapperExtend sysUserMapperExtend;
+
     @PreAuthorize("hasAuthority('ROLE_SYS_ROLE_CONFIGUSER')")
     @RequestMapping(value = "/configUser")
     public String configUser(HttpServletRequest request, Model model, Integer id,
                              RedirectAttributes redirectAttributes) {
+
         model.addAttribute("list", sysUserMapper.selectByExample(null));
-
-        SysRoleUserExample example = new SysRoleUserExample();
-        example.createCriteria().andRoleidEqualTo(id);
-        List<SysRoleUser> list = sysRoleUserMapper.selectByExample(example);
-
-        List<Integer> userids = new ArrayList<>();
-        list.forEach(e -> {
-            userids.add(e.getUserid());
-        });
-
-        //当前角色用户ID不为空才去获取已选用户信息
-        List<SysUser> userList = new ArrayList<>();
-        if (!userids.isEmpty()) {
-            SysUserExample userExample = new SysUserExample();
-            userExample.createCriteria().andIdIn(userids);
-            userList = sysUserMapper.selectByExample(userExample);
-        }
+        List<SysUser> userList = sysUserMapperExtend.findUserByRoleId(id);
 
         String useridStr = "";
         for (SysUser sysUser : userList) {
@@ -174,6 +152,9 @@ public class RoleManageController {
     @Resource
     SysMenuMapper sysMenuMapper;
 
+    @Resource
+    SysMenuMapperExtend sysMenuMapperExtend;
+
     @PreAuthorize("hasAuthority('ROLE_SYS_ROLE_CONFIGMENU')")
     @RequestMapping(value = "/configMenu")
     public String configMenu(HttpServletRequest request, Model model, Integer id) {
@@ -181,22 +162,7 @@ public class RoleManageController {
         menuExample.createCriteria().andIsshowEqualTo(1);
         model.addAttribute("list", sysMenuMapper.selectByExample(menuExample));
 
-        SysRoleMenuExample example = new SysRoleMenuExample();
-        example.createCriteria().andRoleidEqualTo(id);
-        List<SysRoleMenu> list = sysRoleMenuMapper.selectByExample(example);
-
-        List<Integer> menuids = new ArrayList<>();
-        list.forEach(e -> {
-            menuids.add(e.getMenuid());
-        });
-
-        List<SysMenu> menus = new ArrayList<>();
-        if (menuids.size() > 0) {
-            SysMenuExample sysMenuExample = new SysMenuExample();
-            sysMenuExample.createCriteria().andIdIn(menuids);
-            menus = sysMenuMapper.selectByExample(sysMenuExample);
-        }
-
+        List<SysMenu> menus = sysMenuMapperExtend.findMenuByRoleID(id);
         String menusidStr = "";
         for (SysMenu sysMenu : menus) {
             menusidStr += sysMenu.getId() + ",";
@@ -206,7 +172,6 @@ public class RoleManageController {
         }
         model.addAttribute("menuids", menusidStr);
         model.addAttribute("entity", sysRoleMapper.selectByPrimaryKey(id));
-
 
         return prefix + "configMenu";
     }

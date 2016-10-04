@@ -12,7 +12,12 @@
       </configuration>
     </facet>
     <facet type="Spring" name="Spring">
-      <configuration />
+      <configuration>
+        <fileset id="fileset" name="Spring Application Context" removed="false">
+          <file>file://$MODULE_DIR$/src/main/resources/spring-context.xml</file>
+          <file>file://$MODULE_DIR$/src/main/resources/spring-metrics.xml</file>
+        </fileset>
+      </configuration>
     </facet>
   </component>
   <component name="NewModuleRootManager" LANGUAGE_LEVEL="JDK_1_8" inherit-compiler-output="false">
@@ -116,5 +121,13 @@
     <orderEntry type="library" name="Maven: com.fasterxml.jackson.core:jackson-databind:2.6.7" level="project" />
     <orderEntry type="library" name="Maven: com.fasterxml.jackson.core:jackson-annotations:2.6.7" level="project" />
     <orderEntry type="library" name="Maven: com.fasterxml.jackson.core:jackson-core:2.6.7" level="project" />
+    <orderEntry type="library" name="Maven: io.dropwizard.metrics:metrics-core:3.1.2" level="project" />
+    <orderEntry type="library" name="Maven: io.dropwizard.metrics:metrics-jvm:3.1.2" level="project" />
+    <orderEntry type="library" name="Maven: io.dropwizard.metrics:metrics-servlet:3.1.2" level="project" />
+    <orderEntry type="library" name="Maven: io.dropwizard.metrics:metrics-servlets:3.1.2" level="project" />
+    <orderEntry type="library" name="Maven: io.dropwizard.metrics:metrics-healthchecks:3.1.2" level="project" />
+    <orderEntry type="library" name="Maven: io.dropwizard.metrics:metrics-json:3.1.2" level="project" />
+    <orderEntry type="library" name="Maven: com.ryantenney.metrics:metrics-spring:3.1.3" level="project" />
+    <orderEntry type="library" name="Maven: io.dropwizard.metrics:metrics-annotation:3.1.2" level="project" />
   </component>
 </module>
