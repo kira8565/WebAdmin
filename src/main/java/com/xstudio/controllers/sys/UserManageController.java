@@ -1,10 +1,11 @@
 package com.xstudio.controllers.sys;
 
-import com.sun.javafx.scene.control.skin.VirtualFlow;
 import com.xstudio.controllers.framework.BaseController;
 import com.xstudio.dao.sys.*;
-import com.xstudio.models.sys.*;
-import com.xstudio.utilities.CommonUtility;
+import com.xstudio.models.sys.SysRole;
+import com.xstudio.models.sys.SysRoleUser;
+import com.xstudio.models.sys.SysRoleUserExample;
+import com.xstudio.models.sys.SysUser;
 import com.xstudio.utilities.ConstantUtility;
 import com.xstudio.validator.UserValidator;
 import org.apache.commons.lang.StringUtils;
@@ -23,7 +24,6 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -41,6 +41,9 @@ public class UserManageController extends BaseController {
     @Resource
     SysUserMapper sysUserMapper;
 
+    @Resource
+    SysDictMapperExtend sysDictMapperExtend;
+
     @InitBinder
     public void initBinder(WebDataBinder binder) {
         binder.setValidator(userValidator);
@@ -56,13 +59,10 @@ public class UserManageController extends BaseController {
         return prefix + "index";
     }
 
-    //TODO下次继续
     @PreAuthorize("hasAuthority('ROLE_SYS_USER_ADD')")
     @RequestMapping(value = "/add")
     public String add(HttpServletRequest request, Model model, @ModelAttribute("sysUser") SysUser sysUser) {
-        SysDictExample dictExample = new SysDictExample();
-        dictExample.createCriteria().andDictgroupEqualTo("sys_user:sex");
-        model.addAttribute("sex", sysDictMapper.selectByExample(dictExample));
+        model.addAttribute("sex", sysDictMapperExtend.findDictByGroup("sys_user:sex"));
         return prefix + "add";
     }
 
@@ -71,23 +71,20 @@ public class UserManageController extends BaseController {
 
     @PreAuthorize("hasAuthority('ROLE_SYS_USER_ADD')")
     @RequestMapping(value = "/addEntity")
-    public ModelAndView addEntity(HttpServletRequest request, Model model, @Valid @ModelAttribute("sysUser") SysUser sysUser,
+    public ModelAndView addEntity(HttpServletRequest request, Model model,
+                                  @Valid @ModelAttribute("sysUser") SysUser sysUser,
                                   BindingResult bindingResult,
                                   RedirectAttributes redirectAttributes) {
-
-
         sysUser.setPassword(new Md5PasswordEncoder().encodePassword(sysUser.getPassword(), null));
-        return CommonUtility.commonAdd(false, prefix, sysUser, "新增用户", sysUserMapper,
-                redirectAttributes, logger, "");
+        return simpleAdd(bindingResult.hasErrors(), prefix, sysUser, "新增用户", sysUserMapper,
+                redirectAttributes);
     }
 
     @PreAuthorize("hasAuthority('ROLE_SYS_USER_EDIT')")
     @RequestMapping(value = "/edit")
     public String edit(HttpServletRequest request, Model model, Integer id) {
         model.addAttribute("sysUser", sysUserMapper.selectByPrimaryKey(id));
-        SysDictExample dictExample = new SysDictExample();
-        dictExample.createCriteria().andDictgroupEqualTo("sys_user:sex");
-        model.addAttribute("sex", sysDictMapper.selectByExample(dictExample));
+        model.addAttribute("sex", sysDictMapperExtend.findDictByGroup("sys_user:sex"));
         return prefix + "edit";
     }
 
@@ -98,14 +95,14 @@ public class UserManageController extends BaseController {
         if (sysUserMapper.selectByPrimaryKey(sysUser.getId()).getPassword().equals(sysUser.getPassword()) == false) {
             sysUser.setPassword(new Md5PasswordEncoder().encodePassword(sysUser.getPassword(), null));
         }
-        return CommonUtility.commonEdit(false, prefix, sysUser, "编辑用户", sysUserMapper, redirectAttributes, logger, "");
+        return simpleEdit(bindingResult.hasErrors(), prefix, sysUser, "编辑用户", sysUserMapper, redirectAttributes);
     }
 
     @PreAuthorize("hasAuthority('ROLE_SYS_USER_DELETE')")
     @RequestMapping(value = "/deleteEntity")
     public ModelAndView deleteEntity(HttpServletRequest request, Model model, Integer id,
                                      RedirectAttributes redirectAttributes, String limit, String offset) {
-        return CommonUtility.commonDelete(prefix, "删除用户", sysUserMapper, id, redirectAttributes, limit, offset, logger, "");
+        return simpleDelete(prefix, "删除用户", sysUserMapper, id, redirectAttributes, limit, offset);
     }
 
     @Resource
@@ -114,27 +111,14 @@ public class UserManageController extends BaseController {
     @Resource
     SysRoleUserMapper sysRoleUserMapper;
 
+    @Resource
+    SysRoleMapperExtend sysRoleMapperExtend;
+
     @PreAuthorize("hasAuthority('ROLE_SYS_USER_CONFIGROLE')")
     @RequestMapping(value = "/configRole")
     public String configRole(HttpServletRequest request, Model model, Integer id) {
         model.addAttribute("list", sysRoleMapper.selectByExample(null));
-
-        SysRoleUserExample example = new SysRoleUserExample();
-        example.createCriteria().andUseridEqualTo(id);
-        List<SysRoleUser> list = sysRoleUserMapper.selectByExample(example);
-
-        List<Integer> roleids = new ArrayList<>();
-        list.forEach(e -> {
-            roleids.add(e.getRoleid());
-        });
-
-        List<SysRole> roleList = new VirtualFlow.ArrayLinkedList<>();
-        if (roleids.size() > 0) {
-            SysRoleExample sysRoleExample = new SysRoleExample();
-            sysRoleExample.createCriteria().andIdIn(roleids);
-            roleList = sysRoleMapper.selectByExample(sysRoleExample);
-        }
-
+        List<SysRole> roleList = sysRoleMapperExtend.findRoleByUserId(id);
 
         String roleidStr = "";
         for (SysRole sysRole : roleList) {
@@ -145,7 +129,6 @@ public class UserManageController extends BaseController {
         }
         model.addAttribute("roleids", roleidStr);
         model.addAttribute("entity", sysUserMapper.selectByPrimaryKey(id));
-
 
         return prefix + "configRole";
     }
