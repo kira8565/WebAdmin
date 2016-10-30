@@ -22,10 +22,13 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <processorPath useClasspath="true" />
+        <module name="SnmpWalkServer" />
         <module name="webadmin" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
+      <module name="mybatis-plus" target="1.5" />
+      <module name="SnmpWalkServer" target="1.8" />
       <module name="webadmin" target="1.8" />
     </bytecodeTargetLevel>
   </component>
